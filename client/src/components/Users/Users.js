@@ -3,6 +3,7 @@ import styles from "./Users.module.css";
 import api from "./../../utils/api";
 import { FaCheck, FaTimes } from "react-icons/fa";
 import { Table, Button, Form, Col } from "react-bootstrap";
+import { getUsersFromApi } from "../../utils/apiCalls";
 
 const acceptableAge = [];
 for (var i = 0; i <= 100; i++) {
@@ -19,40 +20,30 @@ function Users() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function getUsers() {
+  async function getUsers() {
     if (minAge === "") {
-      setMinAge("0");
+      setMinAge(0);
     }
     if (maxAge === "") {
-      setMaxAge("100");
+      setMaxAge(100);
     }
-    api
-      .get("/users", {
-        params: {
-          minAge: minAge || "0",
-          maxAge: maxAge || "100"
-        }
-      })
-      .then(res => {
-        if (res.status === 200) {
-          setUsers(res.data.users);
-        } else {
-          console.log(res.error);
-        }
-      })
-      .catch(error => {
-        console.log(error);
-      });
+
+    try {
+      const users = await getUsersFromApi(minAge, maxAge);
+      setUsers(users);
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   function checkEmailIsValid(email) {
     api
       .post("/email", {
-        email
+        email,
       })
-      .then(res => {
+      .then((res) => {
         if (res.status === 200) {
-          const newUsers = users.map(x =>
+          const newUsers = users.map((x) =>
             x.email === email ? { ...x, isEmailValid: res.data.isValid } : x
           );
           setUsers(newUsers);
@@ -60,7 +51,7 @@ function Users() {
           console.log(res.error);
         }
       })
-      .catch(error => {
+      .catch((error) => {
         console.log(error);
       });
   }
@@ -69,10 +60,9 @@ function Users() {
     const value = target.value;
     if (
       value === "" ||
-      ((value === isNaN(value)) === false &&
-        acceptableAge.includes(parseInt(value)))
+      (!isNaN(value) && acceptableAge.includes(parseInt(value)))
     ) {
-      setMinAge(target.value);
+      setMinAge(parseInt(target.value));
     }
   }
 
@@ -80,10 +70,9 @@ function Users() {
     const value = target.value;
     if (
       value === "" ||
-      ((value === isNaN(value)) === false &&
-        acceptableAge.includes(parseInt(value)))
+      (!isNaN(value) && acceptableAge.includes(parseInt(value)))
     ) {
-      setMaxAge(target.value);
+      setMaxAge(parseInt(target.value));
     }
   }
 
