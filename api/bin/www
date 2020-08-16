@@ -8,11 +8,20 @@ var app = require('../app');
 var debug = require('debug')('api:server');
 var http = require('http');
 
+
+var ip = process.env.IP || '0.0.0.0';
+
+var port = process.env.PORT || 8080;
+
+app.listen(port, ip, function() {
+ console.log('running at ' + ip + ':' + port);
+ });
+
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '9001');
+#var port = normalizePort(process.env.PORT || '9001');
 app.set('port', port);
 
 /**
